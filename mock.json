@@ -1,0 +1,64 @@
+{
+  "$schema": "./mock.schema.json",
+  "mocks": [
+    {
+      "method": "POST",
+      "path": "/person",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "id": 1
+          },
+          "response": {
+            "id": "1",
+            "name": "Jhon Doe",
+            "age": "33"
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "id": 2
+          },
+          "response": {
+            "id": "2",
+            "name": "Jane Doe",
+            "age": "28"
+          }
+        },
+        {
+          "response": {
+            "message": "Respuesta por defecto, no se encontró coincidencia con 'where'"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/videos/{id}",
+      "responses": [
+        {
+          "in": "param",
+          "where": {
+            "id": 1
+          },
+          "response": {
+            "id": 1,
+            "name": "Mock testing"
+          }
+        },
+        {
+          "in": "param",
+          "where": {
+            "id": 2
+          },
+          "response": {
+            "id": 2,
+            "name": "Playwrite testing"
+          }
+        }
+      ]
+    }
+  ]
+}

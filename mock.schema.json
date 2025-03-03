@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mock Schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "mocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE",
+              "PATCH",
+              "OPTIONS",
+              "HEAD"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "responses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "in": {
+                  "type": "string",
+                  "enum": [
+                    "body",
+                    "query",
+                    "param"
+                  ]
+                },
+                "where": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "response": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "response"
+              ],
+              "dependencies": {
+                "where": [
+                  "in"
+                ]
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "method",
+          "path",
+          "responses"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "mocks"
+  ],
+  "additionalProperties": false
+}
