@@ -1,6 +1,13 @@
 {
   "compilerOptions": {
     "checkJs": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "paths": {
+      "#/*": [
+        "*"
+      ]
+    }
   }
 }
