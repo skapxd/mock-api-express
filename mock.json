@@ -60,6 +60,563 @@
           }
         }
       ]
+    },
+    {
+      "method": "PUT",
+      "path": "/users/:id",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "name": "John Smith"
+          },
+          "status": "200",
+          "response": {
+            "id": "updated",
+            "name": "John Smith",
+            "email": "john.smith@example.com",
+            "updated_at": "2025-04-03T12:34:56Z"
+          }
+        },
+        {
+          "in": "param",
+          "where": {
+            "id": "not-found"
+          },
+          "status": "404",
+          "response": {
+            "error": "User not found",
+            "code": "USER_NOT_FOUND"
+          }
+        },
+        {
+          "response": {
+            "status": "success",
+            "message": "User updated",
+            "timestamp": "2025-04-03T12:34:56Z"
+          }
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/products/:id",
+      "responses": [
+        {
+          "in": "param",
+          "where": {
+            "id": "12345"
+          },
+          "status": "204",
+          "response": {}
+        },
+        {
+          "in": "param",
+          "where": {
+            "id": "forbidden"
+          },
+          "status": "403",
+          "response": {
+            "error": "Cannot delete this product",
+            "reason": "Product is in active orders"
+          }
+        },
+        {
+          "status": "404",
+          "response": {
+            "error": "Product not found"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/books",
+      "responses": [
+        {
+          "in": "query",
+          "where": {
+            "genre": "fiction"
+          },
+          "response": {
+            "total": 2,
+            "items": [
+              {
+                "id": "book1",
+                "title": "The Great Novel",
+                "author": "Famous Author",
+                "genre": "fiction",
+                "year": 2023
+              },
+              {
+                "id": "book2",
+                "title": "Another Story",
+                "author": "New Writer",
+                "genre": "fiction",
+                "year": 2024
+              }
+            ]
+          }
+        },
+        {
+          "in": "query",
+          "where": {
+            "author": "Famous Author"
+          },
+          "response": {
+            "total": 1,
+            "items": [
+              {
+                "id": "book1",
+                "title": "The Great Novel",
+                "author": "Famous Author",
+                "genre": "fiction",
+                "year": 2023
+              }
+            ]
+          }
+        },
+        {
+          "response": {
+            "total": 3,
+            "items": [
+              {
+                "id": "book1",
+                "title": "The Great Novel",
+                "author": "Famous Author",
+                "genre": "fiction",
+                "year": 2023
+              },
+              {
+                "id": "book2",
+                "title": "Another Story",
+                "author": "New Writer",
+                "genre": "fiction",
+                "year": 2024
+              },
+              {
+                "id": "book3",
+                "title": "Technical Guide",
+                "author": "Tech Expert",
+                "genre": "technical",
+                "year": 2022
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "username": "admin",
+            "password": "correct-password"
+          },
+          "status": "200",
+          "response": {
+            "success": true,
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "user": {
+              "id": "admin1",
+              "name": "Administrator",
+              "role": "admin",
+              "permissions": ["read", "write", "delete"]
+            }
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "username": "user",
+            "password": "user-password"
+          },
+          "status": "200",
+          "response": {
+            "success": true,
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "user": {
+              "id": "user1",
+              "name": "Regular User",
+              "role": "user",
+              "permissions": ["read"]
+            }
+          }
+        },
+        {
+          "status": "401",
+          "response": {
+            "success": false,
+            "error": "Invalid credentials",
+            "message": "The username or password provided is incorrect."
+          }
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/orders/:id",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "status": "shipped"
+          },
+          "response": {
+            "id": "order123",
+            "status": "shipped",
+            "updated_at": "2025-04-03T15:30:45Z",
+            "tracking_number": "TRK12345678"
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "status": "cancelled"
+          },
+          "response": {
+            "id": "order123",
+            "status": "cancelled",
+            "updated_at": "2025-04-03T15:31:22Z",
+            "refund_status": "pending"
+          }
+        },
+        {
+          "in": "param",
+          "where": {
+            "id": "non-existent"
+          },
+          "status": "404",
+          "response": {
+            "error": "Order not found"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/articles/:id/comments",
+      "responses": [
+        {
+          "in": "param",
+          "where": {
+            "id": "article1"
+          },
+          "response": {
+            "article_id": "article1",
+            "total_comments": 3,
+            "comments": [
+              {
+                "id": "comment1",
+                "user": "Alice",
+                "text": "Great article!",
+                "created_at": "2025-04-02T10:15:20Z",
+                "likes": 5
+              },
+              {
+                "id": "comment2",
+                "user": "Bob",
+                "text": "I learned a lot from this.",
+                "created_at": "2025-04-02T14:22:30Z",
+                "likes": 3
+              },
+              {
+                "id": "comment3",
+                "user": "Charlie",
+                "text": "Interesting perspective.",
+                "created_at": "2025-04-03T09:11:15Z",
+                "likes": 1
+              }
+            ]
+          }
+        },
+        {
+          "in": "param",
+          "where": {
+            "id": "article2"
+          },
+          "response": {
+            "article_id": "article2",
+            "total_comments": 0,
+            "comments": []
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/checkout",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "payment_method": "credit_card"
+          },
+          "response": {
+            "order_id": "ORD987654",
+            "status": "confirmed",
+            "payment": {
+              "method": "credit_card",
+              "transaction_id": "TXN123456",
+              "amount": 245.99,
+              "currency": "USD"
+            },
+            "estimated_delivery": "2025-04-10"
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "payment_method": "paypal"
+          },
+          "response": {
+            "order_id": "ORD987655",
+            "status": "pending",
+            "payment": {
+              "method": "paypal",
+              "status": "awaiting_confirmation",
+              "amount": 245.99,
+              "currency": "USD"
+            },
+            "next_steps": "Please complete payment on PayPal"
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "items.length": 0
+          },
+          "status": "400",
+          "response": {
+            "error": "Empty cart",
+            "message": "Cannot checkout with an empty cart"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/weather",
+      "responses": [
+        {
+          "in": "query",
+          "where": {
+            "city": "New York"
+          },
+          "response": {
+            "city": "New York",
+            "country": "USA",
+            "temperature": 22,
+            "condition": "Partly Cloudy",
+            "humidity": 60,
+            "wind_speed": 12,
+            "forecast": [
+              { "day": "Tomorrow", "high": 24, "low": 18, "condition": "Sunny" },
+              { "day": "Day after", "high": 26, "low": 19, "condition": "Clear" }
+            ]
+          }
+        },
+        {
+          "in": "query",
+          "where": {
+            "city": "London"
+          },
+          "response": {
+            "city": "London",
+            "country": "UK",
+            "temperature": 15,
+            "condition": "Rainy",
+            "humidity": 80,
+            "wind_speed": 18,
+            "forecast": [
+              { "day": "Tomorrow", "high": 16, "low": 12, "condition": "Showers" },
+              { "day": "Day after", "high": 17, "low": 13, "condition": "Overcast" }
+            ]
+          }
+        },
+        {
+          "status": "400",
+          "response": {
+            "error": "Missing city parameter",
+            "message": "Please provide a city name"
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/settings/private",
+      "responses": [
+        {
+          "in": "body",
+          "where": {
+            "user.id": 1
+          },
+          "response": {
+            "id": 1,
+            "name": "delete users"
+          }
+        },
+        {
+          "in": "body",
+          "where": {
+            "user.id": 2
+          },
+          "response": {
+            "id": 2,
+            "name": "view analytics",
+            "permissions": ["view", "export"],
+            "scope": "global"
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/status",
+      "responses": [
+        {
+          "status": "404",
+          "response": {
+            "error": "Not found"
+          }
+        }
+      ]
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/api",
+      "responses": [
+        {
+          "status": "200",
+          "response": {
+            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            "version": "1.0.0",
+            "documentation": "https://example.com/api-docs"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/products",
+      "responses": [
+        {
+          "in": "query",
+          "where": {
+            "category": "electronics"
+          },
+          "response": {
+            "products": [
+              {
+                "id": "prod123",
+                "name": "Smartphone X",
+                "category": "electronics",
+                "price": 999.99,
+                "stock": 50,
+                "rating": 4.7,
+                "specifications": {
+                  "screen": "6.5 inch",
+                  "processor": "OctaCore",
+                  "ram": "8GB",
+                  "storage": "256GB"
+                }
+              },
+              {
+                "id": "prod124",
+                "name": "Laptop Pro",
+                "category": "electronics",
+                "price": 1499.99,
+                "stock": 25,
+                "rating": 4.8,
+                "specifications": {
+                  "screen": "15.6 inch",
+                  "processor": "DecaCore",
+                  "ram": "16GB",
+                  "storage": "1TB SSD"
+                }
+              }
+            ],
+            "total": 2,
+            "page": 1,
+            "per_page": 10
+          }
+        },
+        {
+          "in": "query",
+          "where": {
+            "min_price": 500,
+            "max_price": 1000
+          },
+          "response": {
+            "products": [
+              {
+                "id": "prod123",
+                "name": "Smartphone X",
+                "category": "electronics",
+                "price": 999.99,
+                "stock": 50,
+                "rating": 4.7
+              },
+              {
+                "id": "prod125",
+                "name": "Coffee Machine",
+                "category": "appliances",
+                "price": 599.99,
+                "stock": 15,
+                "rating": 4.5
+              }
+            ],
+            "total": 2,
+            "page": 1,
+            "per_page": 10
+          }
+        },
+        {
+          "response": {
+            "products": [
+              {
+                "id": "prod123",
+                "name": "Smartphone X",
+                "category": "electronics",
+                "price": 999.99,
+                "stock": 50,
+                "rating": 4.7
+              },
+              {
+                "id": "prod124",
+                "name": "Laptop Pro",
+                "category": "electronics",
+                "price": 1499.99,
+                "stock": 25,
+                "rating": 4.8
+              },
+              {
+                "id": "prod125",
+                "name": "Coffee Machine",
+                "category": "appliances",
+                "price": 599.99,
+                "stock": 15,
+                "rating": 4.5
+              },
+              {
+                "id": "prod126",
+                "name": "Wireless Earbuds",
+                "category": "accessories",
+                "price": 149.99,
+                "stock": 100,
+                "rating": 4.6
+              }
+            ],
+            "total": 4,
+            "page": 1,
+            "per_page": 10
+          }
+        }
+      ]
     }
   ]
 }

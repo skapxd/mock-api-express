@@ -1,14 +1,28 @@
 import "source-map-support/register";
 
 import express from "express";
+import path from "path";
 import { mockController } from "./controllers";
 
 export const app = express();
 // Middleware para parsear el JSON del body
 app.use(express.json());
 
-// Se delega todas las rutas al controlador de mocks
+// Servir archivos estáticos desde el directorio 'public'
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Ruta específica para servir la página principal
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Se delega el resto de rutas al controlador de mocks (excepto las que empiezan con /public)
 app.all("*", async (req, res, next) => {
+  // Ignorar peticiones a archivos estáticos
+  if (req.path.startsWith('/public') || req.path === '/' || req.path === '/mock.json') {
+    return next();
+  }
+  
   try {
     await mockController(req, res);
   } catch (error) {
