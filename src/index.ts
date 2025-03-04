@@ -2,6 +2,7 @@ import "source-map-support/register";
 
 import express from "express";
 import { mockController } from "./controllers";
+import serverless from "serverless-http";
 
 export const app = express();
 // Middleware para parsear el JSON del body
@@ -29,3 +30,4 @@ if (require.main === module) {
 }
 
 export default app;
+export const handler = serverless(app);
