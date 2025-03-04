@@ -7,7 +7,6 @@ describe("End-to-End tests for Express API", () => {
       ok: true,
       async json() {
         return {
-          $schema: "./mock.schema.json",
           mocks: [
             {
               method: "POST",
@@ -69,6 +68,22 @@ describe("End-to-End tests for Express API", () => {
                 },
               ],
             },
+            {
+              method: "POST",
+              path: "/settings/private",
+              responses: [
+                {
+                  in: "body",
+                  where: {
+                    "user.id": 1,
+                  },
+                  response: {
+                    id: 1,
+                    name: "delete users",
+                  },
+                },
+              ],
+            },
           ],
         };
       },
@@ -76,6 +91,19 @@ describe("End-to-End tests for Express API", () => {
   });
 
   const tests = [
+    {
+      method: "post",
+      path: "/skapxd/bc-mocks-apis/settings/private",
+      body: {
+        user: {
+          id: 1,
+        },
+      },
+      expected: {
+        id: 1,
+        name: "delete users",
+      },
+    },
     {
       method: "get",
       path: "/skapxd/bc-mocks-apis/videos/1",
