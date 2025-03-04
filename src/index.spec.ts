@@ -84,6 +84,19 @@ describe("End-to-End tests for Express API", () => {
                 },
               ],
             },
+
+            {
+              method: "POST",
+              path: "/status",
+              responses: [
+                {
+                  status: "404",
+                  response: {
+                    error: "Not fount",
+                  },
+                },
+              ],
+            },
           ],
         };
       },
@@ -144,11 +157,19 @@ describe("End-to-End tests for Express API", () => {
         age: "28",
       },
     },
+    {
+      method: "post",
+      path: "/skapxd/bc-mocks-apis/status",
+      status: 404,
+      expected: {
+        error: "Not fount",
+      },
+    },
   ];
 
   it.each(tests)(
     "Ejecutando el test $method $path $body",
-    async ({ path, expected, method, body }) => {
+    async ({ path, expected, method, body, status }) => {
       const { app } = await import(".");
 
       if (method === "get") {
@@ -158,6 +179,10 @@ describe("End-to-End tests for Express API", () => {
 
       if (method === "post") {
         const response = await request(app).post(path).send(body);
+
+        if (status != null) {
+          expect(response.status).toBe(status);
+        }
         expect(response.body).toEqual(expected);
       }
     }

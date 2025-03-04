@@ -10,6 +10,7 @@
           "where": {
             "id": 1
           },
+          "status": "200",
           "response": {
             "id": "1",
             "name": "Jhon Doe",

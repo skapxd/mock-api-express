@@ -17,9 +17,15 @@ export async function mockController(req: Request, res: Response) {
 
   const response = findResponse(config.responses, req);
 
-  return response
-    ? res.json(response.response)
-    : res.status(404).json({
-        error: "No se encontró una respuesta que coincida con la query",
-      });
+  if (response != null && "status" in response && "response" in response) {
+    return res.status(response.status).json(response.response);
+  }
+
+  if (response != null && "response" in response) {
+    return res.json(response.response);
+  }
+
+  return res.status(404).json({
+    error: "No se encontró una respuesta que coincida con la query",
+  });
 }

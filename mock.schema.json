@@ -39,6 +39,19 @@
                     "param"
                   ]
                 },
+                "status": {
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^(?:[0-9]|[1-5][0-9]{1,2}|600)$"
+                    }
+                  ]
+                },
                 "where": {
                   "type": "object",
                   "additionalProperties": true
