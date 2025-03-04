@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { findMockConfig } from "../helpers/find-mock-config";
 import { findResponse } from "../helpers/find-response";
 import { getJsonMock } from "../helpers/get-json-mock";

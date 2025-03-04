@@ -1,3 +1,4 @@
+import { evaluateWhereCondition } from "../evaluate-where-condition";
 import { getSource } from "../get-source";
 
 export const findResponse = (responses, req) => {
@@ -5,17 +6,8 @@ export const findResponse = (responses, req) => {
   for (const resp of responses) {
     if (!resp.where || !resp.in) continue;
 
-    const sourceData = getSource(resp.in, req);
-    const keys = Object.keys(resp.where);
-
-    const every = (key: string) => {
-      const one = sourceData[key];
-      const two = resp.where[key];
-
-      return `${one}` === `${two}`
-    };
-
-    if (keys.every(every)) {
+    const exist = evaluateWhereCondition(resp.where, resp.in, req);
+    if (exist) {
       return resp;
     }
   }

@@ -6,10 +6,11 @@ export const findMockConfig = (req, mocks, fullUrl: string) => {
 
     const params = matchPath(mock.path, fullUrl);
 
-    if (params) {
+    if (Object.keys(params || {}).length !== 0) {
       req.params = { ...req.params, ...params };
       return true;
     }
-    return mock.path === req.path;
+    const endWith = req.path.endsWith(mock.path);
+    return endWith;
   });
 };

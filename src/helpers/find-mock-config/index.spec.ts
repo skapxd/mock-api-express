@@ -15,7 +15,7 @@ describe("findMockConfig", () => {
   });
 
   it("debe retornar undefined si ningún mock coincide con el método", () => {
-    const req = { method: "GET", path: "/user", params: {} };
+    const req = { method: "GET", path: "github_user/github_repo/user", params: {} };
     const mocks = [{ method: "POST", path: "/user" }];
     // Para este caso, matchPath no debe devolver parámetros
     (matchPath as any).mockReturnValue(null);
@@ -25,7 +25,7 @@ describe("findMockConfig", () => {
   });
 
   it("debe retornar el mock cuando la ruta coincide exactamente (sin parámetros)", () => {
-    const req = { method: "GET", path: "/user", params: {} };
+    const req = { method: "GET", path: "github_user/github_repo/user", params: {} };
     const mockConfig = { method: "GET", path: "/user" };
     const mocks = [mockConfig];
     (matchPath as any).mockReturnValue(null);
@@ -36,7 +36,7 @@ describe("findMockConfig", () => {
   });
 
   it("debe retornar el mock cuando matchPath devuelve parámetros y actualizar req.params", () => {
-    const req = { method: "GET", path: "/user/123", params: {} };
+    const req = { method: "GET", path: "github_user/github_repo/user/123", params: {} };
     const mockConfig = { method: "GET", path: "/user/:id" };
     const mocks = [mockConfig];
     // Simulamos que matchPath devuelve un objeto de parámetros
@@ -48,7 +48,7 @@ describe("findMockConfig", () => {
   });
 
   it("debe retornar el primer mock que coincida entre varios mocks", () => {
-    const req = { method: "GET", path: "/user/123", params: {} };
+    const req = { method: "GET", path: "github_user/github_repo/user/123", params: {} };
     const mock1 = { method: "GET", path: "/user" }; // No coincide: la ruta no es igual
     const mock2 = { method: "GET", path: "/user/:id" };
     const mocks = [mock1, mock2];
@@ -65,7 +65,7 @@ describe("findMockConfig", () => {
   });
 
   it("debe fusionar los parámetros existentes de req.params con los nuevos parámetros", () => {
-    const req = { method: "GET", path: "/user/123", params: { token: "abc" } };
+    const req = { method: "GET", path: "github_user/github_repo/user/123", params: { token: "abc" } };
     const mockConfig = { method: "GET", path: "/user/:id" };
     const mocks = [mockConfig];
     (matchPath as any).mockReturnValue({ id: "123" });
