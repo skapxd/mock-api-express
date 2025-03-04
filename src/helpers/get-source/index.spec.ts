@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import getSource from ".";
+import { getSource } from ".";
 
 describe("getSource", () => {
   it('debe retornar req.body cuando inValue es "body"', () => {

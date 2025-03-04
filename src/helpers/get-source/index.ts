@@ -1,4 +1,4 @@
-function getSource(inValue, req) {
+export const getSource = (inValue: string, req) => {
   switch (inValue) {
     case "body":
       return req.body;
@@ -9,6 +9,4 @@ function getSource(inValue, req) {
     default:
       return {};
   }
-}
-
-module.exports = getSource;
+};

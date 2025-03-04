@@ -15,7 +15,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "clover", "lcov", "cobertura"],
       reportsDirectory: resolve(testResultDir, "coverage"),
-      include: ["src/**/*.js"],
+      include: ["src/**/*.ts"],
       thresholds: {
         branches: 70,
         functions: 70,
@@ -34,4 +34,5 @@ export default defineConfig({
   resolve: {
     alias,
   },
+  
 });
