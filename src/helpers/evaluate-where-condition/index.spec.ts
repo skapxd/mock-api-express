@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { evaluateWhereCondition } from "./index";
 
 // Simulamos el módulo que provee getSource
-vi.mock("#/src/helpers/get-source", () => ({
+vi.mock("../get-source", () => ({
   getSource: vi.fn(),
 }));
 
 // Importamos la función mockeada para poder ajustar sus retornos en cada test
-import { getSource } from "#/src/helpers/get-source";
+import { getSource } from "../get-source";
 
 describe("evaluateWhereCondition", () => {
   beforeEach(() => {

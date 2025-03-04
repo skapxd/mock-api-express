@@ -1,4 +1,4 @@
-import { getSource } from "#/src/helpers/get-source";
+import { getSource } from "../get-source";
 
 // Función auxiliar que obtiene el valor anidado a partir de un objeto y una cadena en notación de punto
 function getNestedValue(obj: any, path: string): any {
