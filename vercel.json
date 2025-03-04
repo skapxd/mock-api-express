@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "functions": {
-    "dist/src/index.js": {
-      "runtime": "@vercel/node"
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
     }
   },
   "rewrites": [
