@@ -22,4 +22,4 @@ RUN yarn build
 
 # Start the server using the production build
 # command to run image -> docker run -p 3000:3000 [full-tag-name]
-CMD [ "yarn", "start" ]
+CMD [ "yarn", "dev" ]

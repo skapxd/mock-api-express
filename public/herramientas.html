@@ -234,18 +234,6 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-200">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-              <h2 class="text-xl font-semibold dark:text-white">Request en formato cURL</h2>
-            </div>
-            <div class="p-4">
-              <pre id="curlRequestContainer"
-                class="p-4 bg-gray-50 dark:bg-gray-900 rounded dark:text-gray-200 overflow-x-auto font-mono text-sm">
-          La información cURL aparecerá aquí
-              </pre>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
@@ -1111,17 +1099,31 @@
               } else {
                 // Buscar en el endpoint para encontrar un ejemplo de respuesta para usarlo como guía
                 let exampleBody = '{\n  \n}';
-                
+
                 // Comprobar si hay alguna respuesta que podamos usar como ejemplo inverso
                 if (currentEndpoint && currentEndpoint.responses && currentEndpoint.responses.length > 0) {
-                  // Usar la primera respuesta como ejemplo
-                  const firstResponse = currentEndpoint.responses[0];
-                  if (firstResponse.response) {
-                    // Usamos la respuesta como base para el ejemplo del body
-                    exampleBody = JSON.stringify(firstResponse.response, null, 2);
+                  // Buscar respuesta específica que coincida con la condición where si existe
+                  const currentResponse = responseElement.querySelector('.response-data');
+                  if (currentResponse && currentResponse.textContent) {
+                    try {
+                      // Intentar usar la respuesta actual como ejemplo
+                      exampleBody = currentResponse.textContent;
+                    } catch (e) {
+                      // Si hay error, usar la primera respuesta
+                      const firstResponse = currentEndpoint.responses[0];
+                      if (firstResponse.response) {
+                        exampleBody = JSON.stringify(firstResponse.response, null, 2);
+                      }
+                    }
+                  } else {
+                    // Usar la primera respuesta como ejemplo
+                    const firstResponse = currentEndpoint.responses[0];
+                    if (firstResponse.response) {
+                      exampleBody = JSON.stringify(firstResponse.response, null, 2);
+                    }
                   }
                 }
-                
+
                 requestBody.value = exampleBody;
               }
 
@@ -1132,7 +1134,13 @@
               requestBody.removeEventListener('input', handleTextareaInput);
               requestBody.addEventListener('input', handleTextareaInput);
             } else {
-              document.querySelector('.mb-6').classList.add('hidden');
+              document.querySelector('.mb-6').classList.remove('hidden');
+              
+              // Para métodos GET o DELETE, permitir mostrar el body pero sin contenido predeterminado
+              requestBody.value = '';
+              adjustTextareaHeight(requestBody);
+              requestBody.removeEventListener('input', handleTextareaInput);
+              requestBody.addEventListener('input', handleTextareaInput);
             }
 
             // Mostrar el modal
@@ -1166,9 +1174,17 @@
 
           // Reiniciar body
           if (currentWhereCondition && currentWhereCondition.in === 'body') {
+            // Si hay una condición de body, usarla
             requestBody.value = JSON.stringify(currentWhereCondition.where, null, 2);
           } else {
-            requestBody.value = '{\n  \n}';
+            // Si hay una respuesta, mostrar como ejemplo
+            const responseData = document.querySelector('.response-data');
+            if (responseData && responseData.textContent && responseData.textContent.trim() !== '') {
+              requestBody.value = responseData.textContent;
+            } else {
+              // Valor por defecto
+              requestBody.value = '{\n  \n}';
+            }
           }
 
           // Ajustar altura del textarea según el nuevo contenido
@@ -1210,12 +1226,17 @@
               }
             };
 
-            // Añadir body si es necesario
-            if (['POST', 'PUT', 'PATCH'].includes(currentEndpoint.method)) {
+            // Añadir body para cualquier método si hay contenido en el textarea
+            if (requestBody.value && requestBody.value.trim() !== '') {
               try {
+                // Para POST, PUT, PATCH se espera que sea JSON válido
+                if (['POST', 'PUT', 'PATCH'].includes(currentEndpoint.method)) {
+                  // Intentar parsear para validar que sea JSON, pero enviamos el string original
+                  JSON.parse(requestBody.value);
+                }
                 options.body = requestBody.value;
               } catch (e) {
-                alert('Error en el formato del body JSON');
+                alert('Error en el formato del body JSON: ' + e.message);
                 return;
               }
             }
