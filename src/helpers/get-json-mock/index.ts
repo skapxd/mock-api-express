@@ -1,6 +1,21 @@
 import { URLPattern } from "urlpattern-polyfill";
+import { Request } from "express";
 
-export async function getJsonMock(origin: string): Promise<any> {
+export async function getJsonMock(origin: string, req?: Request): Promise<any> {
+  // Si se proporciona la cabecera X-Mock-Config, usarla primero
+  if (req && req.headers['x-mock-config']) {
+    try {
+
+      const base64Config = req.headers['x-mock-config'] as string;
+      const jsonString = Buffer.from(base64Config, 'base64').toString('utf-8');
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Error al procesar X-Mock-Config:', error);
+      // Continuar con el flujo normal si hay error
+    }
+  }
+
+  // Proceder con la lógica habitual si no hay cabecera o si falló
   const pattern = new URLPattern({
     pathname: "/:github_user/:github_repo/:other*",
   });

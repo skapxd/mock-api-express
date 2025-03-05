@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Herramientas - Mock API Express</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.9.0/dist/jsoneditor.min.css">
+  <style>
+    /* Ocultar el contenido hasta que se detecte el tema */
+    .theme-transitioning {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .theme-ready {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Estilo para los bloques de código */
+    .code-example {
+      background-color: #f8f9fa;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    html.dark .code-example {
+      background-color: #1e293b;
+      color: #e2e8f0;
+    }
+
+    /* Tabs de herramientas */
+    .tab-active {
+      border-bottom: 2px solid #3b82f6;
+      color: #3b82f6;
+    }
+
+    html.dark .tab-active {
+      border-bottom: 2px solid #60a5fa;
+      color: #60a5fa;
+    }
+  </style>
+  <!-- Script para detectar tema del sistema antes de cargar el contenido -->
+  <script>
+    function applySystemTheme() {
+      document.documentElement.classList.add('dark');
+
+      if (window.matchMedia) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (!prefersDark) {
+          document.documentElement.classList.remove('dark');
+        }
+
+        localStorage.setItem('systemTheme', prefersDark ? 'dark' : 'light');
+      }
+    }
+
+    applySystemTheme();
+  </script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+  <div id="app-container" class="container mx-auto px-4 py-8 theme-transitioning">
+    <nav class="flex justify-between items-center mb-8">
+      <a href="/">
+        <h1 class="text-3xl font-bold dark:text-gray-200">Mock API Express</h1>
+      </a>
+      <div class="flex items-center space-x-6">
+        <a href="index.html#como-funciona"
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Cómo funciona</a>
+        <a href="index.html#ejemplos"
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Ejemplos</a>
+        <a href="herramientas.html"
+          class="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-semibold">Herramientas</a>
+        <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 focus:outline-none">
+          <!-- Sol (tema claro) -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:hidden" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Luna (tema oscuro) -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-200 hidden dark:block" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-center mb-6 dark:text-gray-200">Herramientas de Mock API</h1>
+
+    <!-- Tabs de navegación -->
+    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+      <button id="tab-playground" class="px-4 py-2 font-medium tab-active">Playground</button>
+      <button id="tab-explorer" class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Explorador</button>
+    </div>
+
+    <!-- Contenido de las tabs -->
+    <div id="content-playground" class="tab-content">
+      <!-- Contenido del Playground -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-200">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <h2 class="text-xl font-semibold dark:text-white">Editor de Mock</h2>
+              <div class="space-x-2">
+                <button id="loadExampleBtn"
+                  class="px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm dark:text-gray-200">Cargar
+                  ejemplo</button>
+                <button id="validateBtn"
+                  class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900 dark:hover:bg-blue-800 dark:text-blue-200 rounded text-sm">Validar</button>
+                <button id="saveBtn"
+                  class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">Guardar</button>
+              </div>
+            </div>
+            <div id="jsonEditorActionBar"
+              class="px-4 py-2 flex justify-end space-x-2 border-t border-gray-200 dark:border-gray-700">
+              <!-- Botones adicionales para el editor serán añadidos aquí por JavaScript -->
+            </div>
+            <div>
+              <div id="jsonEditor" style="height: 600px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-200">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-xl font-semibold dark:text-white">Probar API</h2>
+            </div>
+            <div class="p-4">
+              <form id="apiTestForm">
+                <div class="mb-4">
+                  <label for="method" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Método
+                    HTTP</label>
+                  <select id="method"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="PATCH">PATCH</option>
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <label for="endpoint"
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Endpoint</label>
+                  <div class="flex">
+                    <span
+                      class="w-[310px] inline-flex items-center px-3 bg-gray-200 text-gray-700 border border-r-0 border-gray-300 rounded-l dark:bg-gray-700 dark:text-gray-200">
+                      github-user/github-repo
+                    </span>
+                    <input type="text" id="endpoint"
+                      class="w-full p-2 border border-gray-300 rounded-r focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                      placeholder="api/users">
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="requestBody"
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cuerpo de la petición
+                    (JSON)</label>
+                  <textarea
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 font-mono"
+                    id="requestBody" rows="4" placeholder='{"name": "Ejemplo"}'></textarea>
+                </div>
+
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parámetros de
+                    consulta</label>
+                  <div id="queryParams" class="mb-2">
+                    <div class="flex gap-2 mb-2">
+                      <input type="text"
+                        class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        placeholder="Clave" name="queryKey[]">
+                      <input type="text"
+                        class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        placeholder="Valor" name="queryValue[]">
+                      <button type="button"
+                        class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded remove-param">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" id="addQueryParam"
+                    class="px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm dark:text-gray-200">
+                    <span class="flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Añadir parámetro
+                    </span>
+                  </button>
+                </div>
+
+                <button type="submit" class="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded font-medium">
+                  Enviar petición
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-200">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <h2 class="text-xl font-semibold dark:text-white">Respuesta</h2>
+              <span id="statusBadge"
+                class="px-3 py-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">Status:
+                ---</span>
+            </div>
+            <div class="p-4">
+              <pre id="responseContainer"
+                class="p-4 bg-gray-50 dark:bg-gray-900 rounded dark:text-gray-200 overflow-x-auto font-mono text-sm">La respuesta aparecerá aquí</pre>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-200">
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-xl font-semibold dark:text-white">Request en formato cURL</h2>
+            </div>
+            <div class="p-4">
+              <pre id="curlRequestContainer"
+                class="p-4 bg-gray-50 dark:bg-gray-900 rounded dark:text-gray-200 overflow-x-auto font-mono text-sm">
+          La información cURL aparecerá aquí
+              </pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="content-explorer" class="tab-content hidden">
+      <!-- Contenido del Explorer -->
+      <div class="mb-6">
+        <div class="flex mb-4">
+          <input id="repoUrl" type="text" placeholder="Introduce la URL del repositorio GitHub"
+            value="https://github.com/skapxd/mock-api-express"
+            class="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+          <button id="loadBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r">Cargar</button>
+        </div>
+        <div id="error" class="text-red-500 hidden"></div>
+      </div>
+
+      <div id="mockContainer" class="space-y-6">
+        <!-- Mock endpoints will be displayed here -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
+    <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
+      <p>Mock API Express &copy; 2025</p>
+    </div>
+  </footer>
+
+  <!-- Templates for explorer -->
+  <template id="endpointTemplate">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-colors duration-200">
+      <div class="flex items-center mb-3">
+        <span class="method-badge px-3 py-1 rounded-full text-sm font-bold mr-3"></span>
+        <h2 class="path-text text-xl font-semibold dark:text-white"></h2>
+      </div>
+      <div class="responses-container space-y-4 mt-4">
+        <!-- Responses will be added here -->
+      </div>
+    </div>
+  </template>
+
+  <template id="responseTemplate">
+    <div class="border border-gray-200 dark:border-gray-700 rounded-md p-4 transition-colors duration-200">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex flex-wrap gap-2">
+          <div
+            class="where-condition px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm dark:text-gray-200 transition-colors duration-200">
+          </div>
+          <div class="status-code dark:text-gray-200"></div>
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="toggle-response text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
+            Mostrar respuesta
+          </button>
+          <button class="test-endpoint bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm">
+            Probar
+          </button>
+        </div>
+      </div>
+      <pre
+        class="response-data bg-gray-50 dark:bg-gray-900 dark:text-gray-200 p-3 rounded overflow-x-auto hidden transition-colors duration-200"></pre>
+    </div>
+  </template>
+
+  <!-- Modal para probar endpoints -->
+  <div id="testModal"
+    class="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-80 hidden flex items-center justify-center z-50">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto transition-colors duration-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold dark:text-white" id="modalTitle">Probar Endpoint</h3>
+        <button id="closeModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex items-center mb-2">
+          <span id="modalMethod" class="method-badge px-3 py-1 rounded-full text-sm font-bold mr-3"></span>
+          <span id="modalPath" class="text-lg font-medium dark:text-white"></span>
+        </div>
+        <div id="modalDescription" class="text-sm text-gray-600 dark:text-gray-400 mb-4"></div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Parámetros de la petición</label>
+        <div id="requestParams" class="space-y-3"></div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Body de la petición</label>
+        <textarea id="requestBody"
+          class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm min-h-[150px] resize-none overflow-hidden dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
+      </div>
+
+      <div class="flex justify-between">
+        <button id="sendRequest" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Enviar petición
+        </button>
+        <button id="resetRequest"
+          class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 px-4 py-2">
+          Restablecer
+        </button>
+      </div>
+
+      <div id="responseSection" class="mt-6 hidden">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="font-medium dark:text-white">Respuesta</h4>
+          <span id="responseStatus" class="px-2 py-1 rounded text-sm font-medium"></span>
+        </div>
+        <pre id="responseResult"
+          class="bg-gray-50 dark:bg-gray-900 dark:text-gray-200 p-3 rounded overflow-x-auto text-sm max-h-60 transition-colors duration-200"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monaco Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.46.0/min/vs/loader.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Funcionalidad de tabs
+      const tabPlayground = document.getElementById('tab-playground');
+      const tabExplorer = document.getElementById('tab-explorer');
+      const contentPlayground = document.getElementById('content-playground');
+      const contentExplorer = document.getElementById('content-explorer');
+
+      tabPlayground.addEventListener('click', () => {
+        // Activar tab del playground
+        tabPlayground.classList.add('tab-active');
+        tabPlayground.classList.remove('text-gray-600', 'dark:text-gray-400');
+        tabExplorer.classList.remove('tab-active');
+        tabExplorer.classList.add('text-gray-600', 'dark:text-gray-400');
+
+        // Mostrar contenido del playground
+        contentPlayground.classList.remove('hidden');
+        contentExplorer.classList.add('hidden');
+      });
+
+      tabExplorer.addEventListener('click', () => {
+        // Activar tab del explorador
+        tabExplorer.classList.add('tab-active');
+        tabExplorer.classList.remove('text-gray-600', 'dark:text-gray-400');
+        tabPlayground.classList.remove('tab-active');
+        tabPlayground.classList.add('text-gray-600', 'dark:text-gray-400');
+
+        // Mostrar contenido del explorador
+        contentExplorer.classList.remove('hidden');
+        contentPlayground.classList.add('hidden');
+      });
+
+      // Funcionalidad para cambiar entre tema claro y oscuro
+      const themeToggle = document.getElementById('themeToggle');
+      const appContainer = document.getElementById('app-container');
+
+      // Mostrar el contenido una vez que se haya aplicado el tema inicial
+      appContainer.classList.remove('theme-transitioning');
+      appContainer.classList.add('theme-ready');
+
+      // Verificar preferencia manual del usuario (sobrescribe el sistema)
+      const userThemePreference = localStorage.getItem('userThemePreference');
+
+      // Si el usuario ya ha seleccionado manualmente un tema, aplicarlo
+      if (userThemePreference) {
+        if (userThemePreference === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+
+      // Manejar cambio de tema
+      themeToggle.addEventListener('click', () => {
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('userThemePreference', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('userThemePreference', 'dark');
+        }
+      });
+
+      // Escuchar cambios en el tema del sistema operativo
+      const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      darkModeMediaQuery.addEventListener('change', (e) => {
+        // Solo actualizar si el usuario no ha establecido una preferencia manual
+        if (!localStorage.getItem('userThemePreference')) {
+          if (e.matches) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      });
+
+      // Inicializar Monaco Editor
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.46.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        // URL del esquema JSON para autocompletado
+        const schemaUrl = 'https://raw.githubusercontent.com/skapxd/mock-api-express/refs/heads/main/mock.schema.json';
+
+        // Cargar el esquema JSON para habilitar autocompletado y validación
+        fetch(schemaUrl)
+          .then(response => response.json())
+          .then(schema => {
+            // Registrar el esquema para el editor JSON
+            monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+              validate: true,
+              schemas: [{
+                uri: schemaUrl,
+                fileMatch: ['*'],
+                schema: schema
+              }]
+            });
+            console.log('Esquema JSON cargado correctamente para autocompletado');
+          })
+          .catch(error => {
+            console.error('Error al cargar el esquema JSON:', error);
+          });
+
+        // Ejemplo JSON inicial con referencia al esquema
+        const initialJson = {
+          "$schema": "https://raw.githubusercontent.com/skapxd/mock-api-express/refs/heads/main/mock.schema.json",
+          "mocks": [
+            {
+              "method": "GET",
+              "path": "/api/users",
+              "responses": [
+                {
+                  "status": 200,
+                  "response": {
+                    "data": [
+                      {
+                        "id": 1,
+                        "name": "Ana"
+                      },
+                      {
+                        "id": 2,
+                        "name": "Luis"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "method": "GET",
+              "path": "/api/users/:id",
+              "responses": [
+                {
+                  "status": 200,
+                  "in": "param",
+                  "where": {
+                    "id": 1
+                  },
+                  "response": {
+                    "data": [
+                      {
+                        "id": 1,
+                        "name": "Ana"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "status": 200,
+                  "in": "param",
+                  "where": {
+                    "id": 2
+                  },
+                  "response": {
+                    "data": [
+                      {
+                        "id": 2,
+                        "name": "Luis"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+
+        // Configurar el tema según la preferencia del usuario
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        monaco.editor.setTheme(isDarkMode ? 'vs-dark' : 'vs');
+
+        // Crear el editor Monaco
+        const editor = monaco.editor.create(document.getElementById('jsonEditor'), {
+          value: JSON.stringify(initialJson, null, 2),
+          language: 'json',
+          automaticLayout: true,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          roundedSelection: true,
+          renderIndentGuides: true,
+          colorDecorators: true,
+          bracketPairColorization: {
+            enabled: true
+          },
+          tabSize: 2,
+          fontSize: 14,
+          fontFamily: "'Fira Code', Consolas, 'Courier New', monospace",
+          scrollbar: {
+            useShadows: false,
+            verticalScrollbarSize: 10,
+            horizontalScrollbarSize: 10
+          }
+        });
+
+        // Actualizar el tema del editor cuando cambia el tema de la página
+        function updateEditorTheme() {
+          const isDarkMode = document.documentElement.classList.contains('dark');
+          monaco.editor.setTheme(isDarkMode ? 'vs-dark' : 'vs');
+        }
+
+        themeToggle.addEventListener('click', updateEditorTheme);
+
+        // Formatear JSON
+        function formatJson() {
+          try {
+            const content = editor.getValue();
+            const parsedJson = JSON.parse(content);
+            const formattedJson = JSON.stringify(parsedJson, null, 2);
+            editor.setValue(formattedJson);
+          } catch (error) {
+            // No formatear si hay error
+            console.error('Error al formatear JSON:', error);
+          }
+        }
+
+        // Ejemplo JSON completo para el botón "Cargar ejemplo"
+        const exampleJson = {
+          "$schema": "https://raw.githubusercontent.com/skapxd/mock-api-express/refs/heads/main/mock.schema.json",
+          "mocks": [
+            {
+              "method": "GET",
+              "path": "/api/users",
+              "responses": [
+                {
+                  "status": 200,
+                  "response": {
+                    "data": [
+                      { "id": 1, "name": "Ana" },
+                      { "id": 2, "name": "Luis" }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "method": "GET",
+              "path": "/api/users/:id",
+              "responses": [
+                {
+                  "in": "param",
+                  "where": {
+                    "params.id": "1"
+                  },
+                  "status": 200,
+                  "response": {
+                    "data": { "id": 1, "name": "Ana" }
+                  }
+                },
+                {
+                  "in": "param",
+                  "where": {
+                    "params.id": "2"
+                  },
+                  "status": 200,
+                  "response": {
+                    "data": { "id": 2, "name": "Luis" }
+                  }
+                },
+                {
+                  "status": 404,
+                  "response": {
+                    "error": "Usuario no encontrado"
+                  }
+                }
+              ]
+            }
+          ]
+        };
+
+        // Botón para cargar ejemplo
+        document.getElementById('loadExampleBtn').addEventListener('click', function () {
+          editor.setValue(JSON.stringify(exampleJson, null, 2));
+        });
+
+        // Botón para validar
+        document.getElementById('validateBtn').addEventListener('click', function () {
+          try {
+            const json = JSON.parse(editor.getValue());
+            // Aquí se puede agregar lógica adicional de validación
+            alert('JSON válido');
+          } catch (error) {
+            alert('Error en el JSON: ' + error.message);
+          }
+        });
+
+        // Agregar botón de formatear JSON
+        const actionBarDiv = document.querySelector('#jsonEditorActionBar');
+        const formatButton = document.createElement('button');
+        formatButton.className = 'px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm dark:text-gray-200';
+        formatButton.textContent = 'Formatear';
+        formatButton.addEventListener('click', formatJson);
+        actionBarDiv.appendChild(formatButton);
+
+        // API Test Form
+        const apiTestForm = document.getElementById('apiTestForm');
+        apiTestForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const method = document.getElementById('method').value;
+          // Si el endpoint no comienza con /, añadirlo
+          let endpoint = document.getElementById('endpoint').value;
+          if (!endpoint.startsWith('/')) {
+            endpoint = '/' + endpoint;
+          }
+          const requestBody = document.getElementById('requestBody').value;
+
+          // Construir los parámetros de consulta
+          const queryParams = [];
+          const queryKeys = document.getElementsByName('queryKey[]');
+          const queryValues = document.getElementsByName('queryValue[]');
+
+          for (let i = 0; i < queryKeys.length; i++) {
+            if (queryKeys[i].value) {
+              queryParams.push(`${encodeURIComponent(queryKeys[i].value)}=${encodeURIComponent(queryValues[i].value)}`);
+            }
+          }
+
+          const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+          const url = 'github-user/github-repo' + endpoint + queryString;
+
+          // Mostrar "Enviando..." en el contenedor de respuesta
+          const responseContainer = document.getElementById('responseContainer');
+          responseContainer.textContent = 'Enviando petición...';
+
+          try {
+            // Obtener JSON del editor y convertirlo a base64
+            const mockJson = editor.getValue();
+            let mockJsonObj;
+
+            try {
+              // Validar que sea un JSON válido
+              mockJsonObj = JSON.parse(mockJson);
+
+              // Verificar que el JSON tenga la estructura correcta (debe contener 'mocks')
+              if (!mockJsonObj.mocks) {
+                // Intentar envolver el JSON en un objeto con la propiedad 'mocks'
+                mockJsonObj = {
+                  "$schema": "https://raw.githubusercontent.com/skapxd/mock-api-express/refs/heads/main/mock.schema.json",
+                  "mocks": Array.isArray(mockJsonObj) ? mockJsonObj : [mockJsonObj]
+                };
+              }
+            } catch (error) {
+              responseContainer.textContent = 'Error en la configuración del mock: ' + error.message;
+              return;
+            }
+
+            // Convertir el JSON a base64
+            const mockJsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(mockJsonObj))));
+
+            // Opciones para fetch con la cabecera de mock personalizada
+            const options = {
+              method: method,
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Mock-Config': mockJsonBase64
+              }
+            };
+
+            // Añadir body si es necesario
+            if (method !== 'GET' && method !== 'HEAD' && requestBody.trim()) {
+              try {
+                options.body = requestBody;
+              } catch (e) {
+                responseContainer.textContent = 'Error en el formato del body: ' + e.message;
+                return;
+              }
+            }
+
+            // Realizar la petición
+            fetch(url, options)
+              .then(response => {
+                // Actualizar el badge de status
+                document.getElementById('statusBadge').textContent = `Status: ${response.status} ${response.statusText}`;
+
+                // Formatear el badge según el status
+                const statusBadge = document.getElementById('statusBadge');
+                if (response.status >= 200 && response.status < 300) {
+                  statusBadge.className = 'px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm font-medium';
+                } else if (response.status >= 400 && response.status < 500) {
+                  statusBadge.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-full text-sm font-medium';
+                } else if (response.status >= 500) {
+                  statusBadge.className = 'px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-full text-sm font-medium';
+                } else {
+                  statusBadge.className = 'px-3 py-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-full text-sm font-medium';
+                }
+
+                return response.json().catch(e => {
+                  // Si no es JSON, intentar obtener el texto
+                  return response.text().then(text => {
+                    return { rawText: text };
+                  });
+                });
+              })
+              .then(data => {
+                // Mostrar la respuesta formateada
+                if (data.rawText) {
+                  responseContainer.textContent = data.rawText;
+                } else {
+                  responseContainer.textContent = JSON.stringify(data, null, 2);
+                }
+              })
+              .catch(error => {
+                responseContainer.textContent = 'Error: ' + error.message;
+              });
+          } catch (error) {
+            responseContainer.textContent = 'Error al procesar la configuración: ' + error.message;
+          }
+        });
+
+        // Botón para guardar JSON
+        document.getElementById('saveBtn').addEventListener('click', function () {
+          try {
+            const jsonContent = editor.getValue();
+            const parsedJson = JSON.parse(jsonContent);
+
+            // Mostrar mensaje de éxito (en un caso real, aquí se guardaría)
+            console.log('JSON guardado:', parsedJson);
+            alert('Configuración guardada correctamente');
+          } catch (error) {
+            alert('Error al guardar: ' + error.message);
+          }
+        });
+      });
+
+      // Botón para añadir parámetros de consulta
+      document.getElementById('addQueryParam').addEventListener('click', function () {
+        const queryParamsContainer = document.getElementById('queryParams');
+        const newRow = document.createElement('div');
+        newRow.className = 'flex gap-2 mb-2';
+        newRow.innerHTML = `
+          <input type="text" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Clave" name="queryKey[]">
+          <input type="text" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" placeholder="Valor" name="queryValue[]">
+          <button type="button" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded remove-param">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        queryParamsContainer.appendChild(newRow);
+
+        // Añadir evento para eliminar parámetro
+        newRow.querySelector('.remove-param').addEventListener('click', function () {
+          this.closest('.flex').remove();
+        });
+      });
+
+      // Añadir eventos iniciales para eliminar parámetros
+      document.querySelectorAll('.remove-param').forEach(button => {
+        button.addEventListener('click', function () {
+          this.closest('.flex').remove();
+        });
+      });
+
+      // Explorer functionality
+      // Load mock data when button is clicked
+      document.getElementById('loadBtn').addEventListener('click', loadMockData);
+
+      // Cargar el mock del repositorio predeterminado al iniciar la tab de Explorer
+      tabExplorer.addEventListener('click', function () {
+        const repoUrl = document.getElementById('repoUrl').value.trim();
+        if (repoUrl && document.getElementById('mockContainer').children.length === 0) {
+          loadMockData();
+        }
+      });
+
+      async function loadMockData() {
+        const repoUrl = document.getElementById('repoUrl').value.trim();
+        const errorElement = document.getElementById('error');
+
+        if (!repoUrl) {
+          errorElement.textContent = 'Por favor, introduce una URL de repositorio GitHub';
+          errorElement.classList.remove('hidden');
+          return;
+        }
+
+        errorElement.classList.add('hidden');
+
+        try {
+          // Extract owner and repo from GitHub URL
+          // Format: https://github.com/owner/repo
+          const urlParts = repoUrl.split('/');
+          const owner = urlParts[urlParts.length - 2];
+          const repo = urlParts[urlParts.length - 1];
+
+          const branches = ['main', 'master']
+
+          for (const branch of branches) {
+            // Get raw content URL for mock.json
+            const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/mock.json`;
+
+            const response = await fetch(rawUrl);
+
+            if (!response.ok) continue;
+
+            const mockData = await response.json();
+            return displayMockData(mockData);
+          }
+
+          throw new Error(`No se encontró el archivo mock.json`);
+        } catch (error) {
+          errorElement.textContent = `Error al cargar datos del mock: ${error.message}`;
+          errorElement.classList.remove('hidden');
+        }
+      }
+
+      async function fetchLocalMockData() {
+        try {
+          const response = await fetch('/mock.json');
+          if (!response.ok) {
+            throw new Error(`Error al cargar mock.json: ${response.status}`);
+          }
+          const mockData = await response.json();
+          displayMockData(mockData);
+        } catch (error) {
+          const errorElement = document.getElementById('error');
+          errorElement.textContent = `Error al cargar datos del mock local: ${error.message}`;
+          errorElement.classList.remove('hidden');
+        }
+      }
+
+      // Variable para almacenar los datos del mock actuales
+      let mockData = null;
+
+      // Función para ajustar la altura del textarea al contenido
+      function adjustTextareaHeight(textarea) {
+        // Resetear altura para calcular correctamente
+        textarea.style.height = 'auto';
+
+        // Calcular altura del contenido (scrollHeight incluye el contenido oculto)
+        const scrollHeight = textarea.scrollHeight;
+
+        // Establecer la altura (con un mínimo de 150px)
+        textarea.style.height = Math.max(150, scrollHeight) + 'px';
+      }
+
+      // Manejador para el evento input del textarea
+      function handleTextareaInput() {
+        adjustTextareaHeight(this);
+      }
+
+      function displayMockData(data) {
+        // Guardar los datos para usarlos en las pruebas de endpoints
+        mockData = data;
+
+        const container = document.getElementById('mockContainer');
+        container.innerHTML = '';
+
+        mockData.mocks.forEach(mockEndpoint => {
+          const endpointElement = document.getElementById('endpointTemplate').content.cloneNode(true);
+
+          // Set method with appropriate color
+          const methodBadge = endpointElement.querySelector('.method-badge');
+          methodBadge.textContent = mockEndpoint.method;
+
+          switch (mockEndpoint.method) {
+            case 'GET':
+              methodBadge.classList.add('bg-green-100', 'text-green-800');
+              break;
+            case 'POST':
+              methodBadge.classList.add('bg-blue-100', 'text-blue-800');
+              break;
+            case 'PUT':
+              methodBadge.classList.add('bg-yellow-100', 'text-yellow-800');
+              break;
+            case 'DELETE':
+              methodBadge.classList.add('bg-red-100', 'text-red-800');
+              break;
+            default:
+              methodBadge.classList.add('bg-gray-100', 'text-gray-800');
+          }
+
+          // Set path
+          endpointElement.querySelector('.path-text').textContent = mockEndpoint.path;
+
+          // Add responses
+          const responsesContainer = endpointElement.querySelector('.responses-container');
+
+          mockEndpoint.responses.forEach(response => {
+            const responseElement = document.getElementById('responseTemplate').content.cloneNode(true);
+
+            // Set where conditions if they exist
+            const whereConditionElement = responseElement.querySelector('.where-condition');
+            if (response.where) {
+              whereConditionElement.textContent = `${response.in || 'default'}: ${JSON.stringify(response.where)}`;
+            } else {
+              whereConditionElement.textContent = 'Respuesta por defecto';
+            }
+
+            // Set status code if available
+            const statusElement = responseElement.querySelector('.status-code');
+            if (response.status) {
+              statusElement.textContent = `Estado: ${response.status}`;
+              statusElement.classList.add('text-green-600', 'font-semibold');
+            } else {
+              statusElement.textContent = 'Estado: 200 (por defecto)';
+              statusElement.classList.add('text-gray-600');
+            }
+
+            // Set response data
+            responseElement.querySelector('.response-data').textContent = JSON.stringify(response.response, null, 2);
+
+            responsesContainer.appendChild(responseElement);
+          });
+
+          container.appendChild(endpointElement);
+        });
+
+        // Variables para almacenar datos del endpoint actual
+        let currentEndpoint = null;
+        let currentWhereCondition = null;
+
+        // Modal elements
+        const modal = document.getElementById('testModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMethod = document.getElementById('modalMethod');
+        const modalPath = document.getElementById('modalPath');
+        const modalDescription = document.getElementById('modalDescription');
+        const requestParams = document.getElementById('requestParams');
+        const requestBody = document.getElementById('requestBody');
+        const sendRequest = document.getElementById('sendRequest');
+        const resetRequest = document.getElementById('resetRequest');
+        const responseSection = document.getElementById('responseSection');
+        const responseStatus = document.getElementById('responseStatus');
+        const responseResult = document.getElementById('responseResult');
+
+        // Añadir manejadores de eventos para botones de mostrar/ocultar respuesta
+        document.querySelectorAll('.toggle-response').forEach(button => {
+          button.addEventListener('click', function () {
+            // El pre.response-data es el hermano siguiente del div padre que contiene el botón
+            const responseData = this.closest('.border').querySelector('.response-data');
+            const isHidden = responseData.classList.contains('hidden');
+
+            if (isHidden) {
+              responseData.classList.remove('hidden');
+              this.textContent = 'Ocultar respuesta';
+            } else {
+              responseData.classList.add('hidden');
+              this.textContent = 'Mostrar respuesta';
+            }
+          });
+        });
+
+        // Añadir manejadores de eventos para botones de probar endpoint
+        document.querySelectorAll('.test-endpoint').forEach(button => {
+          button.addEventListener('click', function () {
+            // Obtener datos del endpoint y condición 'where'
+            const endpointElement = this.closest('.bg-white');
+            const methodElement = endpointElement.querySelector('.method-badge');
+            const pathElement = endpointElement.querySelector('.path-text');
+
+            const responseElement = this.closest('.border');
+            const whereElement = responseElement.querySelector('.where-condition');
+
+            // Guardar para uso posterior
+            const method = methodElement.textContent;
+            const path = pathElement.textContent;
+            const whereText = whereElement.textContent;
+
+            // Encontrar el endpoint correspondiente en los datos
+            const endpointConfig = mockData.mocks.find(mock =>
+              mock.method === method && mock.path === path
+            );
+
+            if (!endpointConfig) return;
+
+            // Guardar para referencia
+            currentEndpoint = endpointConfig;
+
+            // Encontrar la configuración específica de esta respuesta
+            let whereCondition = null;
+            if (whereText.includes(':')) {
+              const [inType, whereJson] = whereText.split(': ');
+              try {
+                whereCondition = JSON.parse(whereJson);
+                currentWhereCondition = { in: inType, where: whereCondition };
+              } catch (e) {
+                currentWhereCondition = null;
+              }
+            } else {
+              // Es una respuesta por defecto
+              currentWhereCondition = null;
+            }
+
+            // Configurar el modal
+            modalMethod.textContent = method;
+            // Asignar clases de color según el método
+            modalMethod.className = 'method-badge px-3 py-1 rounded-full text-sm font-bold mr-3';
+            switch (method) {
+              case 'GET':
+                modalMethod.classList.add('bg-green-100', 'text-green-800');
+                break;
+              case 'POST':
+                modalMethod.classList.add('bg-blue-100', 'text-blue-800');
+                break;
+              case 'PUT':
+                modalMethod.classList.add('bg-yellow-100', 'text-yellow-800');
+                break;
+              case 'DELETE':
+                modalMethod.classList.add('bg-red-100', 'text-red-800');
+                break;
+              default:
+                modalMethod.classList.add('bg-gray-100', 'text-gray-800');
+            }
+
+            modalPath.textContent = path;
+
+            // Limpiar secciones previas
+            requestParams.innerHTML = '';
+            requestBody.value = '';
+            responseSection.classList.add('hidden');
+
+            // Determinar el tipo de parámetros necesarios
+            if (path.includes(':')) {
+              // Tiene parámetros de ruta
+              const pathParams = path.split('/').filter(part => part.startsWith(':'));
+
+              modalDescription.textContent = `Este endpoint requiere ${pathParams.length} parámetro(s) de ruta.`;
+
+              // Crear campos para cada parámetro
+              pathParams.forEach(param => {
+                const paramName = param.substring(1); // Quitar los :
+                const defaultValue = whereCondition && whereCondition[paramName] ? whereCondition[paramName] : '';
+
+                const paramDiv = document.createElement('div');
+                paramDiv.innerHTML = `
+                  <label class="block text-sm text-gray-700 dark:text-gray-300">${paramName}</label>
+                  <input type="text" name="${paramName}" value="${defaultValue}" 
+                         class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                `;
+                requestParams.appendChild(paramDiv);
+              });
+            } else {
+              modalDescription.textContent = 'Este endpoint no requiere parámetros de ruta.';
+            }
+
+            // Si el método permite body, mostrar editor de JSON
+            if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+              document.querySelector('.mb-6').classList.remove('hidden');
+
+              // Si hay una condición where para body, usarla como valor predeterminado
+              if (currentWhereCondition && currentWhereCondition.in === 'body') {
+                requestBody.value = JSON.stringify(currentWhereCondition.where, null, 2);
+              } else {
+                // Buscar en el endpoint para encontrar un ejemplo de respuesta para usarlo como guía
+                let exampleBody = '{\n  \n}';
+                
+                // Comprobar si hay alguna respuesta que podamos usar como ejemplo inverso
+                if (currentEndpoint && currentEndpoint.responses && currentEndpoint.responses.length > 0) {
+                  // Usar la primera respuesta como ejemplo
+                  const firstResponse = currentEndpoint.responses[0];
+                  if (firstResponse.response) {
+                    // Usamos la respuesta como base para el ejemplo del body
+                    exampleBody = JSON.stringify(firstResponse.response, null, 2);
+                  }
+                }
+                
+                requestBody.value = exampleBody;
+              }
+
+              // Ajustar altura del textarea
+              adjustTextareaHeight(requestBody);
+
+              // Añadir evento para ajustar la altura cuando cambie el contenido
+              requestBody.removeEventListener('input', handleTextareaInput);
+              requestBody.addEventListener('input', handleTextareaInput);
+            } else {
+              document.querySelector('.mb-6').classList.add('hidden');
+            }
+
+            // Mostrar el modal
+            modal.classList.remove('hidden');
+          });
+        });
+
+        // Cerrar el modal
+        closeModal.addEventListener('click', function () {
+          modal.classList.add('hidden');
+        });
+
+        // Click fuera del modal para cerrar
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+
+        // Resetear los campos del formulario
+        resetRequest.addEventListener('click', function () {
+          // Reiniciar parámetros de ruta
+          const inputs = requestParams.querySelectorAll('input');
+          inputs.forEach(input => {
+            if (currentWhereCondition && currentWhereCondition.where && currentWhereCondition.where[input.name]) {
+              input.value = currentWhereCondition.where[input.name];
+            } else {
+              input.value = '';
+            }
+          });
+
+          // Reiniciar body
+          if (currentWhereCondition && currentWhereCondition.in === 'body') {
+            requestBody.value = JSON.stringify(currentWhereCondition.where, null, 2);
+          } else {
+            requestBody.value = '{\n  \n}';
+          }
+
+          // Ajustar altura del textarea según el nuevo contenido
+          adjustTextareaHeight(requestBody);
+
+          // Ocultar sección de respuesta
+          responseSection.classList.add('hidden');
+        });
+
+        // Enviar petición
+        sendRequest.addEventListener('click', async function () {
+          if (!currentEndpoint) return;
+
+          try {
+            // Obtener repositorio actual
+            const repoUrl = document.getElementById('repoUrl').value.trim();
+            const urlParts = repoUrl.split('/');
+            const owner = urlParts[urlParts.length - 2] || 'user';
+            const repo = urlParts[urlParts.length - 1] || 'repo';
+
+            // Construir la URL con formato correcto: /:github_user/:github_repo/endpoint
+            let basePath = `/${owner}/${repo}`;
+            let url = currentEndpoint.path;
+
+            // Reemplazar parámetros de ruta
+            const pathParams = requestParams.querySelectorAll('input');
+            pathParams.forEach(param => {
+              url = url.replace(`:${param.name}`, param.value);
+            });
+
+            // URL completa con el formato que espera el backend
+            const fullUrl = `${basePath}${url}`;
+
+            // Preparar opciones de fetch
+            const options = {
+              method: currentEndpoint.method,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            };
+
+            // Añadir body si es necesario
+            if (['POST', 'PUT', 'PATCH'].includes(currentEndpoint.method)) {
+              try {
+                options.body = requestBody.value;
+              } catch (e) {
+                alert('Error en el formato del body JSON');
+                return;
+              }
+            }
+
+            // Realizar la petición
+            const response = await fetch(fullUrl, options);
+            const result = await response.json();
+
+            // Mostrar resultados
+            responseSection.classList.remove('hidden');
+            responseStatus.textContent = `${response.status} ${response.statusText}`;
+
+            // Color según el status
+            responseStatus.className = 'px-2 py-1 rounded text-sm font-medium';
+            if (response.status >= 200 && response.status < 300) {
+              responseStatus.classList.add('bg-green-100', 'text-green-800');
+            } else if (response.status >= 400 && response.status < 500) {
+              responseStatus.classList.add('bg-yellow-100', 'text-yellow-800');
+            } else if (response.status >= 500) {
+              responseStatus.classList.add('bg-red-100', 'text-red-800');
+            }
+
+            responseResult.textContent = JSON.stringify(result, null, 2);
+          } catch (error) {
+            responseSection.classList.remove('hidden');
+            responseStatus.textContent = 'Error';
+            responseStatus.className = 'px-2 py-1 rounded text-sm font-medium bg-red-100 text-red-800';
+            responseResult.textContent = error.message;
+          }
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,14 +1,5 @@
+import * as dotProp from "dot-prop";
 import { getSource } from "../get-source";
-
-// Función auxiliar que obtiene el valor anidado a partir de un objeto y una cadena en notación de punto
-function getNestedValue(obj: any, path: string): any {
-  return path
-    .split(".")
-    .reduce(
-      (acc, key) => (acc && typeof acc === "object" ? acc[key] : undefined),
-      obj
-    );
-}
 
 export function evaluateWhereCondition(
   where: any,
@@ -27,7 +18,10 @@ export function evaluateWhereCondition(
 
   // Verificamos que cada propiedad en where coincida con source usando comparación laxa (==)
   return Object.keys(where).every((key) => {
-    const nestedValue = getNestedValue(source, key);
-    return nestedValue == where[key];
+    // Usamos dot-prop para obtener el valor anidado desde source, soportando notación de punto
+    const sourceValue = dotProp.getProperty(source, key);
+
+    // Comparación laxa para permitir '1' == 1
+    return sourceValue == where[key];
   });
 }

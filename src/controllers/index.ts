@@ -5,7 +5,7 @@ import { getJsonMock } from "../helpers/get-json-mock";
 
 export async function mockController(req: Request, res: Response) {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
-  const json = await getJsonMock(fullUrl);
+  const json = await getJsonMock(fullUrl, req);
   // const json = require("../../mock.json");
   const config = findMockConfig(req, json.mocks, fullUrl);
 
